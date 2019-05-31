@@ -56,6 +56,14 @@
     position: relative;
 }
 
+.bkImgStock {
+    background-image: url("imagens/imgStock.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+}
+
 .bkNone {
     background-color: transparent !important;
 }
@@ -573,6 +581,30 @@ td , th, tr{
 .inputEmail {
     box-sizing: border-box;
     background-image: url('icons/email.png');
+    background-position: 2px 1px; 
+    background-repeat: no-repeat;
+    padding: 12px 20px 12px 45px;
+}
+
+.inputMoney {
+    box-sizing: border-box;
+    background-image: url('icons/money.png');
+    background-position: 2px 1px; 
+    background-repeat: no-repeat;
+    padding: 12px 20px 12px 45px;
+}
+
+.inputQuant {
+    box-sizing: border-box;
+    background-image: url('icons/quant.png');
+    background-position: 2px 1px; 
+    background-repeat: no-repeat;
+    padding: 12px 20px 12px 45px;
+}
+
+.inputPiece {
+    box-sizing: border-box;
+    background-image: url('icons/piece.png');
     background-position: 2px 1px; 
     background-repeat: no-repeat;
     padding: 12px 20px 12px 45px;

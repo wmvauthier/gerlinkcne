@@ -147,6 +147,34 @@ function createEmployee(id, nome, cpf, attr) {
     table.appendChild(tr);
 }
 
+// CRIAR ITEM DE ESTOQUE
+function createStock(id, description, quantity, value) {
+
+    var table = document.getElementById('stockTableBody');
+    var tr = document.createElement('tr');
+    var td1 = document.createElement('td');
+    var td2 = document.createElement('td');
+    var td3 = document.createElement('td');
+    var td4 = document.createElement('td');
+    $(tr).attr("id", id);
+    $(td1).attr("data-title", "DESCRIÇÃO");
+    $(td2).attr("data-title", "QUANTIDADE");
+    $(td3).attr("data-title", "CUSTO UNITÁRIO");
+    $(td4).attr("data-title", "AÇÕES");
+    td1.innerHTML = description;
+    td2.innerHTML = quantity;
+    td3.innerHTML = value;
+    td4.innerHTML = '<button id="' + id + '" class="btn btn-sm btn-success" onclick="sendServletReturnStock(this); formPlusStockUp(); localStorage.setItem(\'selectedStock\', this.id); $(\'#sAreaPlusForm\').attr(\'action\', \'JavaScript:sendServletChangeStock();\'); localStorage.setItem(\'selectedStockAction\', \'plus\');"><i class="material-icons">add</i></button>&nbsp' +
+            '<button id="' + id + '" class="btn btn-sm btn-danger" onclick="sendServletReturnStock(this); formMinusStockUp(); localStorage.setItem(\'selectedStock\', this.id); $(\'#sAreaMinusForm\').attr(\'action\', \'JavaScript:sendServletChangeStock();\'); localStorage.setItem(\'selectedStockAction\', \'minus\');"><i class="material-icons">remove</i></button>&nbsp' +
+            '<button id="' + id + '" class="btn btn-sm btn-warning" onclick="sendServletReturnStock(this); formCrudStockUp(); localStorage.setItem(\'selectedStock\', this.id); $(\'#sAreaCrudForm\').attr(\'action\', \'JavaScript:sendServletAlterStock();\');"><i class="material-icons">create</i></button>&nbsp' +
+            '<button id="' + id + '" class="btn btn-sm btn-danger" onclick="sendServletDropStock(this);"><i class="material-icons">delete</i></button>';
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    tr.appendChild(td3);
+    tr.appendChild(td4);
+    table.appendChild(tr);
+}
+
 /* #########################################
  #    FUNÇÕES PARA TABELA                #
  ######################################### */
@@ -155,7 +183,45 @@ function createEmployee(id, nome, cpf, attr) {
 $(document).ready(function () {
     var activeSystemClass = $('.list-group-item.active');
     //something is entered in search form
-    $('#system-search').keyup(function () {
+    $('#system-searchCli').keyup(function () {
+        var that = this;
+        // affect all table rows on in systems table
+        var tableBody = $('.table-list-search tbody');
+        var tableRowsClass = $('.table-list-search tbody tr');
+        $('.search-sf').remove();
+        tableRowsClass.each(function (i, val) {
+
+            //Lower text for case insensitive
+            var rowText = $(val).text().toLowerCase();
+            var inputText = $(that).val().toLowerCase();
+            if (inputText != '')
+            {
+                $('.search-query-sf').remove();
+                tableBody.prepend('<tr class="search-query-sf"><td colspan="6"><strong>Resultados: "'
+                        + $(that).val()
+                        + '"</strong></td></tr>');
+            } else
+            {
+                $('.search-query-sf').remove();
+            }
+
+            if (rowText.indexOf(inputText) == -1)
+            {
+                //hide rows
+                tableRowsClass.eq(i).hide();
+            } else
+            {
+                $('.search-sf').remove();
+                tableRowsClass.eq(i).show();
+            }
+        });
+        //all tr elements are hidden
+        if (tableRowsClass.children(':visible').length == 0)
+        {
+            tableBody.append('<tr class="search-sf"><td class="text-muted" colspan="6">Nenhum Cliente foi encontrado.</td></tr>');
+        }
+    });
+    $('#system-searchStock').keyup(function () {
         var that = this;
         // affect all table rows on in systems table
         var tableBody = $('.table-list-search tbody');
@@ -281,14 +347,17 @@ $('#home').click(function () {
     $('#showClients').hide();
     $('#showEmployees').animate({"opacity": "0"}, 500);
     $('#showEmployees').hide();
-    $('#formCategories').animate({"opacity": "0"}, 500);
-    $('#formCategories').hide();
     $('#showFinancial').animate({"opacity": "0"}, 500);
     $('#showFinancial').hide();
+    $('#showStock').animate({"opacity": "0"}, 500);
+    $('#showStock').hide();
+    $('#formCategories').animate({"opacity": "0"}, 500);
+    $('#formCategories').hide();
     $("#mainContent").removeClass("bkImgTec");
     $("#mainContent").removeClass("bkImgCli");
     $("#mainContent").removeClass("bkImgTic");
     $("#mainContent").removeClass("bkImgFinancial");
+    $("#mainContent").removeClass("bkImgStock");
     $("#mainContent").addClass("bkImgCat");
     $('#showHome').animate({"opacity": "1"}, 500);
     $('#showHome').show();
@@ -343,10 +412,13 @@ $('#navClients').click(function () {
     $('#showEmployees').hide();
     $('#showFinancial').animate({"opacity": "0"}, 500);
     $('#showFinancial').hide();
+    $('#showStock').animate({"opacity": "0"}, 500);
+    $('#showStock').hide();
     $("#mainContent").removeClass("bkImgTec");
     $("#mainContent").removeClass("bkImgCat");
     $("#mainContent").removeClass("bkImgTic");
     $("#mainContent").removeClass("bkImgFinancial");
+    $("#mainContent").removeClass("bkImgStock");
     $("#mainContent").addClass("bkImgCli");
     $('#showClients').animate({"opacity": "1"}, 500);
     $('#showClients').show();
@@ -361,24 +433,53 @@ $('#navFinancial').click(function () {
     $('#showHome').hide();
     $('#showContent').animate({"opacity": "0"}, 500);
     $('#showContent').hide();
-    $('#formClients').animate({"opacity": "0"}, 500);
-    $('#formClients').hide();
     $('#showEmployees').animate({"opacity": "0"}, 500);
     $('#showEmployees').hide();
     $('#showClients').animate({"opacity": "0"}, 500);
     $('#showClients').hide();
-    $('#tableClients').animate({"opacity": "0"}, 500);
-    $('#tableClients').hide();
+
+    $('#showStock').animate({"opacity": "0"}, 500);
+    $('#showStock').hide();
     $("#mainContent").removeClass("bkImgTec");
     $("#mainContent").removeClass("bkImgCat");
     $("#mainContent").removeClass("bkImgTic");
     $("#mainContent").removeClass("bkImgCli");
+    $("#mainContent").removeClass("bkImgStock");
     $("#mainContent").addClass("bkImgFin");
     $('#showFinancial').animate({"opacity": "1"}, 500);
     $('#showFinancial').show();
+    $('#fButtonArea').animate({"opacity": "1"}, 500);
+    $('#fButtonArea').show();
     $('#formBudget').animate({"opacity": "0"}, 500);
     $('#formBudget').hide();
     $('#titlePage').html('FINANCEIRO');
+});
+
+$('#navStock').click(function () {
+    sendServletRefreshStock();
+    $('#showHome').animate({"opacity": "0"}, 500);
+    $('#showHome').hide();
+    $('#showContent').animate({"opacity": "0"}, 500);
+    $('#showContent').hide();
+    $('#showEmployees').animate({"opacity": "0"}, 500);
+    $('#showEmployees').hide();
+    $('#showClients').animate({"opacity": "0"}, 500);
+    $('#showClients').hide();
+    $('#showFinancial').animate({"opacity": "0"}, 500);
+    $('#showFinancial').hide();
+    $('#formStock').animate({"opacity": "0"}, 500);
+    $('#formStock').hide();
+    $("#mainContent").removeClass("bkImgTec");
+    $("#mainContent").removeClass("bkImgCat");
+    $("#mainContent").removeClass("bkImgTic");
+    $("#mainContent").removeClass("bkImgCli");
+    $("#mainContent").removeClass("bkImgFin");
+    $("#mainContent").addClass("bkImgStock");
+    $('#showStock').animate({"opacity": "1"}, 500);
+    $('#showStock').show();
+    $('#tableStock').animate({"opacity": "1"}, 500);
+    $('#tableStock').show();
+    $('#titlePage').html('ESTOQUE');
 });
 
 $('#navEmployees').click(function () {
@@ -393,10 +494,15 @@ $('#navEmployees').click(function () {
     $('#formEmployees').hide();
     $('#showReady').animate({"opacity": "0"}, 500);
     $('#showReady').hide();
+    $('#showFinancial').animate({"opacity": "0"}, 500);
+    $('#showFinancial').hide();
+    $('#showStock').animate({"opacity": "0"}, 500);
+    $('#showStock').hide();
     $("#mainContent").removeClass("bkImgCli");
     $("#mainContent").removeClass("bkImgCat");
     $("#mainContent").removeClass("bkImgTic");
     $("#mainContent").removeClass("bkImgFinancial");
+    $("#mainContent").removeClass("bkImgStock");
     $("#mainContent").addClass("bkImgTec");
     $('#showEmployees').animate({"opacity": "1"}, 500);
     $('#showEmployees').show();
@@ -440,6 +546,111 @@ $('.finBudgetBack').click(function () {
     $('#finButtonArea').animate({"opacity": "1"}, 500);
     $('#finButtonArea').show();
 });
+
+$('#formCrudStockBack').click(function () {
+    sendServletRefreshStock();
+    $('#formStock').animate({"opacity": "0"}, 500);
+    $('#formStock').hide();
+    $('#tableStock').animate({"opacity": "1"}, 500);
+    $('#tableStock').show();
+});
+
+$('.formCrudStockUp').click(function () {
+    $('#tableStock').animate({"opacity": "0"}, 500);
+    $('#tableStock').hide();
+    $('#formPlusStock').animate({"opacity": "0"}, 500);
+    $('#formPlusStock').hide();
+    $('#formMinusStock').animate({"opacity": "0"}, 500);
+    $('#formMinusStock').hide();
+    $('#formCrudStock').animate({"opacity": "1"}, 500);
+    $('#formCrudStock').show();
+    $('#formStock').animate({"opacity": "1"}, 500);
+    $('#formStock').show();
+});
+
+function formCrudStockUp() {
+    $('#tableStock').animate({"opacity": "0"}, 500);
+    $('#tableStock').hide();
+    $('#formPlusStock').animate({"opacity": "0"}, 500);
+    $('#formPlusStock').hide();
+    $('#formMinusStock').animate({"opacity": "0"}, 500);
+    $('#formMinusStock').hide();
+    $('#formCrudStock').animate({"opacity": "1"}, 500);
+    $('#formCrudStock').show();
+    $('#formStock').animate({"opacity": "1"}, 500);
+    $('#formStock').show();
+}
+;
+
+$('#formPlusStockBack').click(function () {
+    sendServletRefreshStock();
+    $('#formStock').animate({"opacity": "0"}, 500);
+    $('#formStock').hide();
+    $('#tableStock').animate({"opacity": "1"}, 500);
+    $('#tableStock').show();
+});
+
+$('.formPlusStockUp').click(function () {
+    $('#tableStock').animate({"opacity": "0"}, 500);
+    $('#tableStock').hide();
+    $('#formCrudStock').animate({"opacity": "0"}, 500);
+    $('#formCrudStock').hide();
+    $('#formMinusStock').animate({"opacity": "0"}, 500);
+    $('#formMinusStock').hide();
+    $('#formPlusStock').animate({"opacity": "1"}, 500);
+    $('#formPlusStock').show();
+    $('#formStock').animate({"opacity": "1"}, 500);
+    $('#formStock').show();
+});
+
+function formPlusStockUp() {
+    $('#tableStock').animate({"opacity": "0"}, 500);
+    $('#tableStock').hide();
+    $('#formCrudStock').animate({"opacity": "0"}, 500);
+    $('#formCrudStock').hide();
+    $('#formMinusStock').animate({"opacity": "0"}, 500);
+    $('#formMinusStock').hide();
+    $('#formPlusStock').animate({"opacity": "1"}, 500);
+    $('#formPlusStock').show();
+    $('#formStock').animate({"opacity": "1"}, 500);
+    $('#formStock').show();
+}
+;
+
+$('#formMinusStockBack').click(function () {
+    sendServletRefreshStock();
+    $('#formStock').animate({"opacity": "0"}, 500);
+    $('#formStock').hide();
+    $('#tableStock').animate({"opacity": "1"}, 500);
+    $('#tableStock').show();
+});
+
+$('.formMinusStockUp').click(function () {
+    $('#tableStock').animate({"opacity": "0"}, 500);
+    $('#tableStock').hide();
+    $('#formCrudStock').animate({"opacity": "0"}, 500);
+    $('#formCrudStock').hide();
+    $('#formPlusStock').animate({"opacity": "0"}, 500);
+    $('#formPlusStock').hide();
+    $('#formMinusStock').animate({"opacity": "1"}, 500);
+    $('#formMinusStock').show();
+    $('#formStock').animate({"opacity": "1"}, 500);
+    $('#formStock').show();
+});
+
+function formMinusStockUp() {
+    $('#tableStock').animate({"opacity": "0"}, 500);
+    $('#tableStock').hide();
+    $('#formCrudStock').animate({"opacity": "0"}, 500);
+    $('#formCrudStock').hide();
+    $('#formPlusStock').animate({"opacity": "0"}, 500);
+    $('#formPlusStock').hide();
+    $('#formMinusStock').animate({"opacity": "1"}, 500);
+    $('#formMinusStock').show();
+    $('#formStock').animate({"opacity": "1"}, 500);
+    $('#formStock').show();
+}
+;
 
 $('#formEmployeesBack').click(function () {
     $('#formEmployees').animate({"opacity": "0"}, 500);
@@ -798,6 +1009,7 @@ function sendServletRefreshClients() {
 
             var jsonData = JSON.parse(response);
             $("#clientTableBody").html("");
+            $("#genBudget-formFinancialClient").html("<option value='' disabled selected>Nome do Cliente</option>");
             //DESENHA OS CLIENTES
             for (var i = 0; i < jsonData.clients.length; i++) {
                 var client = jsonData.clients[i];
@@ -1078,6 +1290,307 @@ function sendServletRefreshCategories() {
 
     };
     xhr.open("post", "categoryRefresh", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send();
+}
+
+/* #########################################
+ #     CHAMADAS PARA SERVLETS DE PEÇAS     # INACABADO ###########
+ ######################################### */
+
+function sendServletAddPiece() {
+
+    var name = $('#eAreaFormClient').val();
+    var login = $('#eAreaFormLogin').val();
+    var password = $('#eAreaFormPassword').val();
+    var checkPassword = $('#eAreaFormCheckPassword').val();
+    var cpf = $('#eAreaFormCPF').val();
+    var address = $('#eAreaFormAddress').val();
+    var number = $('#eAreaFormNumber').val();
+    var city = $('#eAreaFormCity').val();
+    var neigh = $('#eAreaFormNeigh').val();
+    var state = $('#eAreaFormState').val();
+    var cep = $('#eAreaFormCEP').val();
+    var contact = $('#eAreaFormContact').val();
+    var email = $('#eAreaFormEmail').val();
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var call = JSON.parse(xhr.responseText);
+            sendServletRefreshEmployees();
+            $('#eAreaForm')[0].reset();
+            $('#formEmployeesBack').click();
+        }
+    };
+    xhr.open("post", "employeeRegister", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send("name=" + name + "&login=" + login + "&password=" + password + "&cpf=" + cpf + "&address=" + address + "&number=" + number + "&city=" + city + "&state=" + state + "&neigh=" + neigh + "&cep=" + cep + "&contact=" + contact + "&email=" + email);
+}
+
+function sendServletAlterPiece() {
+
+    var id = localStorage.getItem("selectedEmployee");
+    var name = $('#eAreaFormClient').val();
+    var login = $('#eAreaFormLogin').val();
+    var password = $('#eAreaFormPassword').val();
+    var checkPassword = $('#eAreaFormCheckPassword').val();
+    var cpf = $('#eAreaFormCPF').val();
+    var address = $('#eAreaFormAddress').val();
+    var number = $('#eAreaFormNumber').val();
+    var city = $('#eAreaFormCity').val();
+    var neigh = $('#eAreaFormNeigh').val();
+    var state = $('#eAreaFormState').val();
+    var cep = $('#eAreaFormCEP').val();
+    var contact = $('#eAreaFormContact').val();
+    var email = $('#eAreaFormEmail').val();
+    var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            sendServletRefreshEmployees();
+            $('#formEmployeesBack').click();
+        }
+    };
+    xhr.open("post", "employeeAlter", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send("name=" + name + "&login=" + login + "&password=" + password + "&cpf=" + cpf + "&address=" + address + "&number=" + number + "&city=" + city + "&state=" + state + "&neigh=" + neigh + "&cep=" + cep + "&contact=" + contact + "&email=" + email + "&id=" + id);
+}
+
+function sendServletReturnPiece(choosenEmployee) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var response = xhr.responseText;
+            var jsonData = JSON.parse(response);
+            for (var i = 0; i < jsonData.employees.length; i++) {
+                var employee = jsonData.employees[i];
+                if (choosenEmployee.id === employee.id) {
+                    $('#eAreaFormClient').val(employee.name);
+                    $('#eAreaFormLogin').val(employee.login);
+                    $('#eAreaFormPassword').val(employee.password);
+                    $('#eAreaFormCheckPassword').val(employee.password);
+                    $('#eAreaFormCPF').val(employee.cpf);
+                    $('#eAreaFormAddress').val(employee.log);
+                    $('#eAreaFormNumber').val(employee.number);
+                    $('#eAreaFormCity').val(employee.city);
+                    $('#eAreaFormNeigh').val(employee.neigh);
+                    $('#eAreaFormState').val(employee.state);
+                    $('#eAreaFormCEP').val(employee.zip);
+                    $('#eAreaFormContact').val(employee.contact);
+                    $('#eAreaFormEmail').val(employee.email);
+                }
+            }
+        }
+    };
+    xhr.open("post", "employeeRefresh", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send();
+}
+
+function sendServletDropPiece(choosenEmployee) {
+
+    var r = confirm("Deseja mesmo excluir este Técnico?");
+    if (r === true) {
+
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                $('#' + choosenEmployee.id).remove();
+            }
+        };
+
+        xhr.open("post", "employeeDrop", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send("id=" + choosenEmployee.id);
+
+    } else {
+
+    }
+
+}
+
+function sendServletRefreshPieces() {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+
+            var response = xhr.responseText;
+            try {
+                var jsonData = JSON.parse(response);
+            } catch (err) {
+                $("#employeeTableBody").html("");
+                $("#employeeTableBody").html("Não existem Técnicos cadastrados.");
+                return false;
+            }
+
+            var jsonData = JSON.parse(response);
+
+            $("#employeeTableBody").html("");
+            //DESENHA OS TÉCNICOS
+            for (var i = 0; i < jsonData.employees.length; i++) {
+                var employee = jsonData.employees[i];
+                createEmployee(employee.id, employee.name, employee.cpf, employee.attr);
+                $("#addTicket-formEmployee").append("<option value='" + employee.name + "'>" + employee.name + "</option>");
+                $("#alterTicket-formEmployee").append("<option value='" + employee.name + "'>" + employee.name + "</option>");
+                $("#fixTicket-formEmployee").append("<option value='" + employee.name + "'>" + employee.name + "</option>");
+                $("#reportCall-formEmployee").append("<option value='" + employee.name + "'>" + employee.name + "</option>");
+            }
+
+        }
+    };
+    xhr.open("post", "employeeRefresh", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send();
+}
+
+/* #########################################
+ #     CHAMADAS PARA SERVLETS DE ESTOQUE   # INACABADO ###########
+ ######################################### */
+
+function sendServletAddStock() {
+
+    var description = $('#eAreaFormClient').val();
+    var quantity = $('#eAreaFormLogin').val();
+    var value = $('#eAreaFormPassword').val();
+
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var stock = JSON.parse(xhr.responseText);
+            sendServletRefreshStock();
+            $('#sAreaForm')[0].reset();
+            $('#formStockBack').click();
+        }
+    };
+
+    xhr.open("post", "stockRegister", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send("description=" + description + "&quantity=" + quantity + "&value=" + value);
+
+}
+
+function sendServletAlterStock() {
+
+    var id = localStorage.getItem("selectedStock");
+    var description = $('#sAreaCrudFormDescription').val();
+    var quantity = $('#sAreaCrudFormQuantity').val();
+    var value = $('#sAreaCrudFormValue').val();
+    var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            sendServletRefreshStock();
+            $('#formCrudStockBack').click();
+        }
+    };
+    xhr.open("post", "stockAlter", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send("id=" + id + "&description=" + description + "&quantity=" + quantity + "&value=" + value);
+}
+
+function sendServletReturnStock(choosenStock) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var response = xhr.responseText;
+            var jsonData = JSON.parse(response);
+            for (var i = 0; i < jsonData.stocks.length; i++) {
+                var stock = jsonData.stocks[i];
+                console.log(stock);
+                if (choosenStock.id === stock.id) {
+                    $('#sAreaCrudFormDescription').val(stock.description);
+                    $('#sAreaPlusFormDescription').val(stock.description);
+                    $('#sAreaMinusFormDescription').val(stock.description);
+                    $('#sAreaCrudFormQuantity').val(stock.quantity);
+                    $('#sAreaCrudFormValue').val(stock.value);
+                    localStorage.setItem("selectedStock", choosenStock.id);
+                }
+            }
+        }
+    };
+    xhr.open("post", "stockRefresh", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send();
+}
+
+function sendServletChangeStock() {
+
+    var id = localStorage.getItem("selectedStock");
+    var action = localStorage.getItem("selectedStockAction");
+    var quantity = "";
+
+    if (action === "plus") {
+        quantity = $('#sAreaPlusFormQuantity').val();
+        $('#formPlusStockBack').click();
+
+    } else if (action === "minus") {
+        quantity = $('#sAreaMinusFormQuantity').val();
+        $('#formMinusStockBack').click();
+    }
+
+    var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            sendServletRefreshStock();
+        }
+    };
+    xhr.open("post", "stockChange", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send("id=" + id + "&quantity=" + quantity + "&action=" + action);
+}
+
+function sendServletDropStock(choosenEmployee) {
+
+    var r = confirm("Deseja mesmo excluir este Técnico?");
+    if (r === true) {
+
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                $('#' + choosenEmployee.id).remove();
+            }
+        };
+
+        xhr.open("post", "employeeDrop", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send("id=" + choosenEmployee.id);
+
+    } else {
+
+    }
+
+}
+
+function sendServletRefreshStock() {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+
+            var response = xhr.responseText;
+            try {
+                var jsonData = JSON.parse(response);
+            } catch (err) {
+                $("#stockTableBody").html("");
+                $("#stockTableBody").html("Não existem Itens cadastrados.");
+                return false;
+            }
+
+            var jsonData = JSON.parse(response);
+
+            $("#stockTableBody").html("");
+            $("#genBudget-formFinancialStock").html("<option value='' disabled selected>Peça Solicitada</option");
+
+            //DESENHA OS ITENS DE ESTOQUE
+            for (var i = 0; i < jsonData.stocks.length; i++) {
+                var stock = jsonData.stocks[i];
+                createStock(stock.id, stock.description, stock.quantity, stock.value);
+                $("#genBudget-formFinancialPiece").append("<option value='" + stock.description + "'>" + stock.description + "</option>");
+            }
+
+        }
+    };
+    xhr.open("post", "stockRefresh", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.send();
 }
@@ -1507,7 +2020,7 @@ function codeAddress() {
     createCategoryButton();
     $("#reportCall-formResult").css("visibility", "hidden");
     $('#home').click();
-    $('#navFinancial').click();
+    $('#navStock').click();
 }
 
 $(document).ready(function () {

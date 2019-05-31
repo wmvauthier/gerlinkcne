@@ -67,13 +67,16 @@
                     <a class="mdl-navigation__link" id="home" href="#"><i class="material-icons" role="presentation">dashboard</i>Home</a>
                     <div id="navCategories"></div>
                     <a class="mdl-navigation__link" id="navFinancial" href="#"><i class="material-icons" role="presentation">monetization_on</i>Financeiro</a>
-                    <a class="mdl-navigation__link" id="navClients" href="#"><i class="material-icons" role="presentation">supervised_user_circle</i>Clientes</a>
-                    <a class="mdl-navigation__link" id="navEmployees" href="#"><i class="material-icons" role="presentation">contacts</i>Técnicos</a>
+                    <!--<a class="mdl-navigation__link" id="navPieces" href="#"><i class="material-icons" role="presentation">settings</i>Peças</a>-->
+                    <a class="mdl-navigation__link" id="navStock" href="#"><i class="material-icons" role="presentation">assignment</i>Estoque</a>
+                    <a class="mdl-navigation__link" id="navMembers" href="#"><i class="material-icons" role="presentation">supervised_user_circle</i>Membros</a>
+                    <a class="mdl-navigation__link" id="navCongregated" href="#"><i class="material-icons" role="presentation">contacts</i>Congregados</a>
                     <div class="mdl-layout-spacer"></div>
                 </nav>
 
             </div>
 
+            <!-- DASHBOARD -->
             <main id="mainContent" class="mdl-layout__content mdl-color--grey-100">
 
                 <!-- DASHBOARD TICKETS | (showContent - Tickets de uma Categoria)-->
@@ -227,9 +230,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <select id="genBudget-formFinancialClient" name="client" class="form-control inputClient" required>
-                                        <option value="" disabled selected>Nome do Cliente</option>
-                                    </select>
+                                    <select id="genBudget-formFinancialClient" name="client" class="form-control inputClient" required></select>
                                 </div>
                             </div><br>
                             <!-- PEÇAS SOLICITADAS -->
@@ -238,15 +239,13 @@
                             </fieldset>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <select id="genBudget-formFinancialClient" name="client" class="form-control inputClient">
-                                        <option value="" disabled selected>Peça Solicitada 01</option>
-                                    </select>
+                                    <select id="genBudget-formFinancialStock" name="piece" class="form-control inputPiece"></select>
                                 </div>
                                 <div class="col-md-3">
-                                    <input value="" name="qtd" placeholder="Quantidade" class="form-control inputClient"/>
+                                    <input value="" name="qtd" placeholder="Quantidade" class="form-control inputQuant"/>
                                 </div>
                                 <div class="col-md-3">
-                                    <input value="" name="costs" placeholder="Valor" class="form-control inputClient" disabled/>
+                                    <input value="" name="costs" placeholder="Valor" class="form-control inputMoney" disabled/>
                                 </div>
                             </div>
 
@@ -255,8 +254,168 @@
                             <input type="button" value="Limpar" onclick="$('#fBudgetForm').trigger('reset')" class="btn btn-primary">
 
                         </form>
+
                     </div>
 
+                </div>
+
+                <!-- DASHBOARD STOCK | (showStock - Estoque)-->
+                <div id="showStock" class="bkNone"></br>
+
+                    <!-- ÁREA DA TABELA DE ESTOQUE -->
+                    <div id="tableStock" class="demo-chart bWhite container overflowBarBigger row">
+
+                        <!--TABELA DE ESTOQUE -->
+                        <div class="container">
+                            <div class="panel-heading row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 box" style="margin-bottom: 10px;">
+                                    <h3>ESTOQUE ATUAL<button onclick="$('#sAreaCrudForm').trigger('reset'); $('#sAreaForm').attr('action', 'JavaScript:sendServletAddStock();');" class="btn btn-sm btn-success tag formCrudStockUp"><i class="material-icons">add</i></button></h3>
+                                </div>
+                            </div>
+                            <fieldset>
+                                <legend>Itens</legend>
+                            </fieldset>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <form action="#" method="get">
+                                        <div class="input-group">
+                                            <input class="form-control" id="system-searchStock" name="q" placeholder="Pesquisar Itens em Estoque" required>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="no-more-tables">
+                                        <table class="table table-hover bWhite table-list-search table-condensed cf custab">
+                                            <thead class="cf">
+                                                <tr>
+                                                    <th>DESCRIÇÃO</th>
+                                                    <th>QUANTIDADE</th>
+                                                    <th>CUSTO UNITÁRIO</th>
+                                                    <th>AÇÕES</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="stockTableBody"></tbody>
+                                        </table>
+                                    </div>  
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- FORMS PARA ESTOQUE -->
+                    <div id="formStock" class="demo-chart bWhite container row">
+
+                        <!-- FORM PARA INCLUIR/ALTERAR ESTOQUE -->
+                        <div id="formCrudStock" class="panel bkNone col-xs-12 col-sm-12 col-md-12">
+                            <div class="panel-heading row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 box" style="margin-bottom: 10px;">
+                                    <h3>INSIRA AS INFORMAÇÕES DO ITEM<button id="formCrudStockBack" class="btn btn-sm btn-primary tag"><i class="material-icons">reply</i></button></h3>
+                                </div>
+                            </div>
+                            <div class="panel-body-height">
+                                <form id="sAreaCrudForm" role="form" action="JavaScript:sendServletAddStock();">
+                                    <fieldset>
+                                        <legend>Descrição do Item</legend>
+                                        <div class="row">
+                                            <div class="col-xs-12 col-sm-12 col-md-12">
+                                                <div class="form-group">
+                                                    <input type="text" name="id" id="sAreaCrudFormId" class="hidden">
+                                                    <input type="text" name="description" id="sAreaCrudFormDescription" class="form-control inputComment" placeholder="Descrição do Item" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xs-6 col-sm-6 col-md-6">
+                                                <div class="form-group">
+                                                    <input type="text" name="quantity" id="sAreaCrudFormQuantity" class="form-control inputQuant" placeholder="Quantidade em Estoque">
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-6 col-sm-6 col-md-6">
+                                                <input type="text" name="value" id="sAreaCrudFormValue" class="form-control inputMoney" placeholder="Valor Unitário">
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    </br>
+
+                                    <input type="submit" value="Inserir" class="btn btn-danger">
+                                    <input type="button" value="Limpar" onclick="$('#sAreaCrudForm').trigger('reset')" class="btn btn-primary">
+
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- FORM PARA ADICIONAR QUANTIDADES NO ESTOQUE-->
+                        <div id="formPlusStock" class="panel bkNone col-xs-12 col-sm-12 col-md-12">
+                            <div class="panel-heading row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 box" style="margin-bottom: 10px;">
+                                    <h3>ADIÇÃO DE ITENS<button id="formPlusStockBack" class="btn btn-sm btn-primary tag"><i class="material-icons">reply</i></button></h3>
+                                </div>
+                            </div>
+                            <div class="panel-body-height">
+                                <form id="sAreaPlusForm" role="form" action="JavaScript:sendServletChangeStock();">
+                                    <fieldset>
+                                        <legend>Quantidade a ser adicionada</legend>
+                                        <div class="row">
+                                            <div class="col-xs-6 col-sm-6 col-md-6">
+                                                <div class="form-group">
+                                                    <input type="text" name="id" id="sAreaPlusFormId" class="hidden">
+                                                    <input type="text" name="description" id="sAreaPlusFormDescription" class="form-control inputComment" placeholder="Descrição do Item" disabled required>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-6 col-sm-6 col-md-6">
+                                                <div class="form-group">
+                                                    <input type="text" name="quantity" id="sAreaPlusFormQuantity" class="form-control inputQuant" placeholder="Quantidade em Estoque">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    </br>
+
+                                    <input type="submit" value="Adicionar" class="btn btn-danger">
+                                    <input type="button" value="Limpar" onclick="$('#sAreaPlusForm').trigger('reset')" class="btn btn-primary">
+
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- FORM PARA REMOVER QUANTIDADES NO ESTOQUE-->
+                        <div id="formMinusStock" class="panel bkNone col-xs-12 col-sm-12 col-md-12">
+                            <div class="panel-heading row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 box" style="margin-bottom: 10px;">
+                                    <h3>SAÍDA DE ITENS<button id="formMinusStockBack" class="btn btn-sm btn-primary tag"><i class="material-icons">reply</i></button></h3>
+                                </div>
+                            </div>
+                            <div class="panel-body-height">
+                                <form id="sAreaMinusForm" role="form" action="JavaScript:sendServletChangeStock();">
+                                    <fieldset>
+                                        <legend>Quantidade a ser adicionada</legend>
+                                        <div class="row">
+                                            <div class="col-xs-6 col-sm-6 col-md-6">
+                                                <div class="form-group">
+                                                    <input type="text" name="id" id="sAreaMinusFormId" class="hidden">
+                                                    <input type="text" name="description" id="sAreaMinusFormDescription" class="form-control inputComment" placeholder="Descrição do Item" disabled required>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-6 col-sm-6 col-md-6">
+                                                <div class="form-group">
+                                                    <input type="text" name="quantity" id="sAreaMinusFormQuantity" class="form-control inputQuant" placeholder="Quantidade em Estoque">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    </br>
+
+                                    <input type="submit" value="Adicionar" class="btn btn-danger">
+                                    <input type="button" value="Limpar" onclick="$('#sAreaMinusForm').trigger('reset')" class="btn btn-primary">
+
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
 
                 </div>
 
@@ -280,7 +439,7 @@
                                 <div class="col-md-12">
                                     <form action="#" method="get">
                                         <div class="input-group">
-                                            <input class="form-control" id="system-search" name="q" placeholder="Pesquisar Clientes" required>
+                                            <input class="form-control" id="system-searchCli" name="q" placeholder="Pesquisar Clientes" required>
                                         </div>
                                     </form>
                                 </div>
@@ -447,7 +606,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <div id="no-more-tables2">
+                                    <div id="no-more-tables">
                                         <table class="table table-hover bWhite table-list-search table-condensed cf custab">
                                             <thead class="cf">
                                                 <tr>
@@ -582,6 +741,7 @@
 
         </div>
 
+        <!-- TELA DE LOGIN -->
         <div id="loginScreen">
 
             <div class="container">
